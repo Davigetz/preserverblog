@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Author {
+  id    Int     @id @default(autoincrement())
+  name  String
+  bio   String?
+  photo String
+
+  posts   Postauthor[]
+  Comment Comment[]
+}
+
+model Category {
+  id Int @id @default(autoincrement())
+
+  name String
+  slug String @unique
+
+  PostCategory PostCategory[]
+  Comment      Comment[]
+}
+
+model Comment {
+  id         Int      @id @default(autoincrement())
+  name       String
+  addedAt    DateTime @default(now()) @map("added_at")
+  comment    String
+  author     Author   @relation(fields: [authorId], references: [id])
+  category   Category @relation(fields: [categoryId], references: [id])
+  authorId   Int
+  categoryId Int
+}
+
+model Post {
+  id           Int            @id @default(autoincrement())
+  title        String?
+  slug         String         @unique
+  excerpt      String
+  content      String
+  featureImage String
+  featurePot   Boolean
+  postauthor   Postauthor[]
+  postCategory PostCategory[]
+  addedAt      DateTime       @default(now()) @map("added_at")
+
+  @@map("post")
+}
+
+model Postauthor {
+  post     Post   @relation(fields: [postId], references: [id])
+  postId   Int    @map("post_id")
+  author   Author @relation(fields: [authorId], references: [id])
+  authorId Int    @map("author_id")
+
+  addedAt DateTime @default(now()) @map("added_at")
+
+  @@id([postId, authorId])
+  @@map("post_author")
+}
+
+model PostCategory {
+  post       Post     @relation(fields: [postId], references: [id])
+  postId     Int      @map("post_id")
+  category   Category @relation(fields: [cateogryId], references: [id])
+  cateogryId Int      @map("category_id")
+
+  addedAt DateTime @default(now()) @map("added_at")
+
+  @@id([postId, cateogryId])
+  @@map("post_category")
+}
